@@ -204,11 +204,17 @@ dav_wal_tx_snap(void *hdl, void *addr, daos_size_t size, void *src, uint32_t fla
 	struct dav_obj		*dav_hdl = (struct dav_obj *)hdl;
 	struct dav_tx		*tx = utx2wtx(dav_hdl->do_utx);
 	struct wal_action	*wa_redo;
+	int                      rc;
 
 	D_ASSERT(hdl != NULL);
 
 	if (addr == NULL || size == 0 || size > UMEM_ACT_PAYLOAD_MAX_LEN)
 		return -DER_INVAL;
+
+	rc = umem_cache_touch(dav_hdl->do_cache, dav_hdl->do_utx->utx_id,
+			      mdblob_addr2offset(tx->wt_dav_hdl, addr), size);
+	if (rc != 0)
+		return rc;
 
 	if (flags & DAV_XADD_WAL_CPTR) {
 		D_ALLOC_ACT(wa_redo, UMEM_ACT_COPY_PTR, size);
@@ -236,10 +242,16 @@ dav_wal_tx_assign(void *hdl, void *addr, uint64_t val)
 	struct dav_obj		*dav_hdl = (struct dav_obj *)hdl;
 	struct dav_tx		*tx = utx2wtx(dav_hdl->do_utx);
 	struct wal_action	*wa_redo;
+	int                      rc;
 
 	D_ASSERT(hdl != NULL);
 	if (addr == NULL)
 		return -DER_INVAL;
+
+	rc = umem_cache_touch(dav_hdl->do_cache, dav_hdl->do_utx->utx_id,
+			      mdblob_addr2offset(tx->wt_dav_hdl, addr), sizeof(uint64_t));
+	if (rc != 0)
+		return rc;
 
 	D_ALLOC_ACT(wa_redo, UMEM_ACT_ASSIGN, sizeof(uint64_t));
 	if (wa_redo == NULL)
@@ -259,10 +271,16 @@ dav_wal_tx_set_bits(void *hdl, void *addr, uint32_t pos, uint16_t num_bits)
 	struct dav_obj		*dav_hdl = (struct dav_obj *)hdl;
 	struct dav_tx		*tx = utx2wtx(dav_hdl->do_utx);
 	struct wal_action	*wa_redo;
+	int                      rc;
 
 	D_ASSERT(hdl != NULL);
 	if (addr == NULL)
 		return -DER_INVAL;
+
+	rc = umem_cache_touch(dav_hdl->do_cache, dav_hdl->do_utx->utx_id,
+			      mdblob_addr2offset(tx->wt_dav_hdl, addr), sizeof(uint64_t));
+	if (rc != 0)
+		return rc;
 
 	D_ALLOC_ACT(wa_redo, UMEM_ACT_SET_BITS, sizeof(uint64_t));
 	if (wa_redo == NULL)
@@ -282,10 +300,16 @@ dav_wal_tx_clr_bits(void *hdl, void *addr, uint32_t pos, uint16_t num_bits)
 	struct dav_obj		*dav_hdl = (struct dav_obj *)hdl;
 	struct dav_tx		*tx = utx2wtx(dav_hdl->do_utx);
 	struct wal_action	*wa_redo;
+	int                      rc;
 
 	D_ASSERT(hdl != NULL);
 	if (addr == NULL)
 		return -DER_INVAL;
+
+	rc = umem_cache_touch(dav_hdl->do_cache, dav_hdl->do_utx->utx_id,
+			      mdblob_addr2offset(tx->wt_dav_hdl, addr), sizeof(uint64_t));
+	if (rc != 0)
+		return rc;
 
 	D_ALLOC_ACT(wa_redo, UMEM_ACT_CLR_BITS, sizeof(uint64_t));
 	if (wa_redo == NULL)
@@ -307,11 +331,17 @@ dav_wal_tx_set(void *hdl, void *addr, char c, daos_size_t size)
 	struct dav_obj		*dav_hdl = (struct dav_obj *)hdl;
 	struct dav_tx		*tx = utx2wtx(dav_hdl->do_utx);
 	struct wal_action	*wa_redo;
+	int                      rc;
 
 	D_ASSERT(hdl != NULL);
 
 	if (addr == NULL || size == 0 || size > UMEM_ACT_PAYLOAD_MAX_LEN)
 		return -DER_INVAL;
+
+	rc = umem_cache_touch(dav_hdl->do_cache, dav_hdl->do_utx->utx_id,
+			      mdblob_addr2offset(tx->wt_dav_hdl, addr), size);
+	if (rc != 0)
+		return rc;
 
 	D_ALLOC_ACT(wa_redo, UMEM_ACT_SET, size);
 	if (wa_redo == NULL)

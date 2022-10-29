@@ -1573,4 +1573,180 @@ umem_tx_publish(struct umem_instance *umm, struct umem_rsrvd_act *rsrvd_act)
 	rsrvd_act->rs_actv_at = 0;
 	return rc;
 }
+
+int
+umem_cache_alloc(struct umem_store *store, struct umem_cache **cachep, uint64_t max_mapped)
+{
+	struct umem_cache *cache;
+	int                num_pages;
+	int                rc = 0;
+	int                idx;
+
+	D_ASSERT(store != NULL && cachep != NULL);
+
+	num_pages = (store->stor_size + UMEM_CACHE_PAGE_SZ - 1) >> UMEM_CACHE_PAGE_SZ_SHIFT;
+
+	if (max_mapped != 0) {
+		D_ERROR("Setting max_mapped is unsupported at present\n");
+		return -DER_NOTSUPPORTED;
+	}
+
+	D_ALLOC(cache, sizeof(*cache) + num_pages * sizeof(cache->ca_pages[0]));
+	if (cache == NULL)
+		D_GOTO(error, rc = -DER_NOMEM);
+
+	cache->ca_store = store;
+	cache->ca_num_pages  = num_pages;
+	cache->ca_max_mapped = num_pages;
+
+	D_INIT_LIST_HEAD(&cache->ca_pgs_dirty);
+	D_INIT_LIST_HEAD(&cache->ca_pgs_lru);
+
+	for (idx = 0; idx < num_pages; idx++)
+		cache->ca_pages[idx].pg_id = idx;
+
+	*cachep = cache;
+
+	return 0;
+
+error:
+	D_FREE(cache);
+	return rc;
+}
+
+int
+umem_cache_free(struct umem_cache *cache)
+{
+	/** XXX: check reference counts? */
+	D_FREE(cache);
+	return 0;
+}
+
+int
+umem_cache_check(struct umem_cache *cache, uint64_t num_pages)
+{
+	D_ASSERT(num_pages + cache->ca_mapped <= cache->ca_num_pages);
+
+	if (num_pages > cache->ca_max_mapped - cache->ca_mapped)
+		return num_pages - (cache->ca_max_mapped - cache->ca_mapped);
+
+	return 0;
+}
+
+int
+umem_cache_evict(struct umem_cache *cache, uint64_t num_pages)
+{
+	/** XXX: Not yet implemented */
+	return 0;
+}
+
+int
+umem_cache_map_range(struct umem_cache *cache, umem_off_t offset, void *start_addr,
+		     uint64_t num_pages)
+{
+	struct umem_page *page;
+	struct umem_page *end_page;
+	uint64_t          current_addr = (uint64_t)start_addr;
+
+	page     = umem_cache_off2page(cache, offset);
+	end_page = page + num_pages;
+
+	D_ASSERTF(page->pg_id + num_pages <= cache->ca_num_pages,
+		  "pg_id=%d, num_pages=" DF_U64 ", cache pages=" DF_U64 "\n", page->pg_id,
+		  num_pages, cache->ca_num_pages);
+
+	while (page != end_page) {
+		D_ASSERT(page->pg_addr == NULL);
+		page->pg_addr = (void *)current_addr;
+		current_addr += UMEM_CACHE_PAGE_SZ;
+
+		d_list_add_tail(&page->pg_link, &cache->ca_pgs_lru);
+		page++;
+	}
+
+	cache->ca_mapped += num_pages;
+
+	return 0;
+}
+
+int
+umem_cache_pin(struct umem_cache *cache, umem_off_t addr, daos_size_t size)
+{
+	struct umem_page *page      = umem_cache_off2page(cache, addr);
+	struct umem_page *end_page  = umem_cache_off2page(cache, addr + size - 1) + 1;
+
+	while (page != end_page) {
+		page->pg_ref++;
+		page++;
+	}
+
+	return 0;
+}
+
+int
+umem_cache_unpin(struct umem_cache *cache, umem_off_t addr, daos_size_t size)
+{
+	struct umem_page *page     = umem_cache_off2page(cache, addr);
+	struct umem_page *end_page = umem_cache_off2page(cache, addr + size - 1) + 1;
+
+	while (page != end_page) {
+		D_ASSERT(page->pg_ref >= 1);
+		page->pg_ref--;
+		page++;
+	}
+
+	return 0;
+}
+
+static inline void
+touch_page(struct umem_cache *cache, struct umem_page *page, umem_off_t first_byte,
+	   umem_off_t last_byte)
+{
+	int start_bit = (first_byte & UMEM_CACHE_PAGE_SZ_MASK) >> UMEM_CACHE_PAGE_SZ_SHIFT;
+	int end_bit   = (last_byte & UMEM_CACHE_PAGE_SZ_MASK) >> UMEM_CACHE_PAGE_SZ_SHIFT;
+
+	setbit_range(&page->pg_bmap[0], start_bit, end_bit);
+
+	if (!page->pg_dirty) {
+		d_list_del(&page->pg_link);
+		d_list_add_tail(&page->pg_link, &cache->ca_pgs_dirty);
+		page->pg_dirty = 1;
+	}
+}
+
+int
+umem_cache_touch(struct umem_cache *cache, uint64_t wr_tx, umem_off_t addr, daos_size_t size)
+{
+	struct umem_page *page      = umem_cache_off2page(cache, addr);
+	umem_off_t        end_addr  = addr + size - 1;
+	struct umem_page *end_page  = umem_cache_off2page(cache, end_addr);
+	umem_off_t        start_addr;
+
+	if (page->pg_chkpt)
+		return -DER_CHKPT_BUSY;
+
+	if (page != end_page) {
+		/** Eventually, we can just assert equal here.  But until we have a guarantee that
+		 * no allocation will span a page boundary, we have to handle this case.  We should
+		 * never have to span multiple pages though.
+		 */
+		if (end_page->pg_chkpt)
+			return -DER_CHKPT_BUSY;
+		D_ASSERT((page + 1) == end_page);
+		start_addr = end_addr & ~UMEM_CACHE_PAGE_SZ_MASK;
+
+		touch_page(cache, end_page, start_addr, end_addr);
+		end_addr = start_addr - 1;
+	}
+
+	touch_page(cache, page, addr, end_addr);
+
+	return 0;
+}
+
+int
+umem_cache_checkpoint(struct umem_cache *cache, uint64_t wal_tx)
+{
+	return 0;
+}
 #endif
