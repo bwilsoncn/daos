@@ -9,6 +9,7 @@ from pydaos.raw import DaosApiError
 import avocado
 
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrPreserveProps(DataMoverTestBase):
@@ -59,7 +60,7 @@ class DmvrPreserveProps(DataMoverTestBase):
         pool1.connect(2)
 
         # set the path to read and write container properties
-        self.preserve_props_path = join(self.tmp, "cont_props.h5")
+        preserve_props_path = join(self.tmp, "cont_props.h5")
 
         # Create a source cont
         cont1 = self.get_container(pool1, type=cont_type)
@@ -72,17 +73,19 @@ class DmvrPreserveProps(DataMoverTestBase):
 
         # move data from DAOS to POSIX path and record container properties in hdf5 file
         self.run_datamover(
-            self.test_id + " cont1 to posix",
-            "DAOS", "/", pool1, cont1,
-            "POSIX", posix_path, None, None)
+            "cont1 to posix",
+            src=format_path(pool1, cont1),
+            dst=posix_path,
+            preserve_props=preserve_props_path)
 
         # move data from POSIX path to DAOS and read container properties in hdf5 file to cont2
         # don't copy test directory back to DAOS, only test file needs to be verified with ior
         posix_file_path = join(posix_path, self.test_file)
         result = self.run_datamover(
-            self.test_id + " posix to cont2 (empty cont)",
-            "POSIX", posix_file_path, None, None,
-            "DAOS", "/", pool1, None)
+            "posix to cont2 (empty cont)",
+            src=posix_file_path,
+            dst=format_path(pool1),
+            preserve_props=preserve_props_path)
 
         cont2_label = self.parse_create_cont_label(result.stdout_text)
         cont2 = self.get_cont(pool1, cont2_label)
@@ -103,7 +106,7 @@ class DmvrPreserveProps(DataMoverTestBase):
         """
         if cont.type.value == "POSIX":
             self.run_ior_with_params(
-                "DAOS", "/" + self.test_file,
+                "DFS", "/" + self.test_file,
                 cont.pool, cont, flags=self.ior_flags[0])
         else:
             self.obj_list = self.dataset_gen(cont, 1, 1, 1, 0, [1024], [])
@@ -139,7 +142,7 @@ class DmvrPreserveProps(DataMoverTestBase):
         if cont.type.value == "POSIX":
             # Verify POSIX containers copied with the DFS and Object APIs
             self.run_ior_with_params(
-                "DAOS", "/" + self.test_file,
+                "DFS", "/" + self.test_file,
                 cont.pool, cont, flags=self.ior_flags[1])
         else:
             # Verify non-POSIX containers copied with the Object API

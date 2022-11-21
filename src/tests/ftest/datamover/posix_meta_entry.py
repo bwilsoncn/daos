@@ -1,11 +1,12 @@
-#!/usr/bin/python
 '''
   (C) Copyright 2020-2022 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
-from os.path import join
+import os
+
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrPosixMetaEntry(DataMoverTestBase):
@@ -56,17 +57,17 @@ class DmvrPosixMetaEntry(DataMoverTestBase):
         # Get preserve level
         preserve_on = self.params.get("preserve", "/run/{}/*".format(self.tool.lower()))
 
-        test_desc = self.test_id + " (preserve={})".format(str(preserve_on))
+        test_desc = "(preserve={})".format(str(preserve_on))
 
         # Start dfuse to hold all pools/containers
-        self.start_dfuse(self.dfuse_hosts)
+        self.start_dfuse(self.hostlist_clients)
 
         # Create 1 pool
         pool1 = self.create_pool()
 
         # Create 1 source container with test data
         cont1 = self.get_container(pool1)
-        daos_src_path = self.new_daos_test_path(False)
+        daos_src_path = self.new_daos_test_path()
         dfuse_src_path = "{}/{}/{}{}".format(
             self.dfuse.mount_dir.value, pool1.uuid, cont1.uuid, daos_src_path)
         self.create_data(dfuse_src_path)
@@ -79,13 +80,13 @@ class DmvrPosixMetaEntry(DataMoverTestBase):
         # For each case, create a new destination directory.
         # For DAOS, cont1 is used as the source and destination.
         # DAOS -> DAOS
-        daos_dst_path = self.new_daos_test_path(False)
+        daos_dst_path = self.new_daos_test_path()
         dfuse_dst_path = "{}/{}/{}{}".format(
             self.dfuse.mount_dir.value, pool1.uuid, cont1.uuid, daos_dst_path)
         self.run_datamover(
             test_desc + "(DAOS->DAOS)",
-            "DAOS", daos_src_path, pool1, cont1,
-            "DAOS", daos_dst_path, pool1, cont1)
+            src=format_path(pool1, cont1, daos_src_path),
+            dst=format_path(pool1, cont1, daos_dst_path))
         self.compare_data(
             dfuse_src_path, dfuse_dst_path,
             cmp_times=preserve_on, cmp_xattr=preserve_on)
@@ -94,23 +95,21 @@ class DmvrPosixMetaEntry(DataMoverTestBase):
         posix_dst_path = self.new_posix_test_path(create=False, parent=self.workdir)
         self.run_datamover(
             test_desc + "(DAOS->POSIX)",
-            "DAOS", daos_src_path, pool1, cont1,
-            "POSIX", posix_dst_path)
+            src=format_path(pool1, cont1, daos_src_path),
+            dst=posix_dst_path)
         self.compare_data(
-            dfuse_src_path, posix_dst_path,
-            cmp_times=preserve_on, cmp_xattr=preserve_on)
+            dfuse_src_path, posix_dst_path, cmp_times=preserve_on, cmp_xattr=preserve_on)
 
         # POSIX -> DAOS
-        daos_dst_path = self.new_daos_test_path(False)
+        daos_dst_path = self.new_daos_test_path()
         dfuse_dst_path = "{}/{}/{}{}".format(
             self.dfuse.mount_dir.value, pool1.uuid, cont1.uuid, daos_dst_path)
         self.run_datamover(
             test_desc + "(POSIX->DAOS)",
-            "POSIX", posix_src_path, None, None,
-            "DAOS", daos_dst_path, pool1, cont1)
+            src=posix_src_path,
+            dst=format_path(pool1, cont1, daos_dst_path))
         self.compare_data(
-            posix_src_path, dfuse_dst_path,
-            cmp_times=preserve_on, cmp_xattr=preserve_on)
+            posix_src_path, dfuse_dst_path, cmp_times=preserve_on, cmp_xattr=preserve_on)
 
     def create_data(self, path):
         """Create the test data.
@@ -120,7 +119,7 @@ class DmvrPosixMetaEntry(DataMoverTestBase):
         """
         cmd_list = [
             # One directory
-            "mkdir -p '{}'".format(join(path, "dir1")),
+            "mkdir -p '{}'".format(os.path.join(path, "dir1")),
             "pushd '{}'".format(path),
 
             # xattrs for the directory
@@ -176,8 +175,8 @@ class DmvrPosixMetaEntry(DataMoverTestBase):
 
         # Diff the fields for each entry
         for entry in ["dir1", "dir1/file1", "dir1/link1"]:
-            entry1 = join(path1, entry)
-            entry2 = join(path2, entry)
+            entry1 = os.path.join(path1, entry)
+            entry2 = os.path.join(path2, entry)
             if field_printf:
                 # Use stat to get perms, etc.
                 stat_cmd1 = "stat --printf '{}' '{}'".format(

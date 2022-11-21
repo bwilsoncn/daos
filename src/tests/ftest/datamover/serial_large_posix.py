@@ -47,28 +47,28 @@ class DmvrSerialLargePosix(DataMoverTestBase):
 
         # Create a large directory in cont1
         self.mdtest_cmd.write_bytes.update(file_size)
-        self.run_mdtest_with_params("DAOS", "/", pool1, cont1, flags=mdtest_flags[0])
+        self.run_mdtest_with_params("DFS", "/", pool1, cont1, flags=mdtest_flags[0])
 
         # Create pool2
         pool2 = self.create_pool()
 
         # Use dfuse as a shared intermediate for serialize + deserialize
         dfuse_cont = self.get_container(pool1)
-        self.start_dfuse(self.dfuse_hosts, pool1, dfuse_cont)
-        self.serial_tmp_dir = self.dfuse.mount_dir.value
+        self.start_dfuse(self.hostlist_clients, pool1, dfuse_cont)
 
         # Serialize/Deserialize cont1 to a new cont2 in pool2
         result = self.run_datamover(
-            self.test_id + " (cont1->HDF5->cont2)",
-            src_path=format_path(pool1, cont1),
-            dst_pool=pool2)
+            "(cont1->HDF5->cont2)",
+            src=format_path(pool1, cont1),
+            pool=pool2.identifier,
+            tmp_dir=self.dfuse.mount_dir.value)
 
         # Get the destination cont2 uuid
         cont2_label = self.parse_create_cont_label(result.stdout_text)
 
         # Update mdtest params, read back and verify data from cont2
         self.mdtest_cmd.read_bytes.update(file_size)
-        self.run_mdtest_with_params("DAOS", "/", pool2, cont2_label, flags=mdtest_flags[1])
+        self.run_mdtest_with_params("DFS", "/", pool2, cont2_label, flags=mdtest_flags[1])
 
     def test_dm_serial_large_posix_dserialize(self):
         """

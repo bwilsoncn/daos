@@ -63,7 +63,7 @@ class DmvrPosixTypesTest(DataMoverTestBase):
         self.set_tool(tool)
 
         # Start dfuse to hold all pools/containers
-        self.start_dfuse(self.dfuse_hosts)
+        self.start_dfuse(self.hostlist_clients)
 
         # Create 2 pools
         pool1 = self.create_pool(label='pool1')
@@ -120,7 +120,7 @@ class DmvrPosixTypesTest(DataMoverTestBase):
         # Run and verify each copy
         for (test_desc, src, dst) in copy_list:
             # dir -> dir variation
-            self.run_datamover(test_desc + " (dir->dir)", src_path=src, dst_path=dst)
+            self.run_datamover(test_desc + " (dir->dir)", src=src, dst=dst)
 
             if self.tool == "DSYNC":
                 # The source directory is synced TO the destination.
@@ -139,8 +139,8 @@ class DmvrPosixTypesTest(DataMoverTestBase):
             # file -> file variation
             self.run_datamover(
                 test_desc + " (file->file)",
-                src_path=join(src, self.test_file),
-                dst_path=join(dst, self.test_file))
+                src=join(src, self.test_file),
+                dst=join(dst, self.test_file))
             self.read_verify_location(dst)
 
             # file -> dir variation
@@ -149,8 +149,8 @@ class DmvrPosixTypesTest(DataMoverTestBase):
             if self.tool != "DSYNC":
                 self.run_datamover(
                     test_desc + " (file->dir)",
-                    src_path=join(src, self.test_file),
-                    dst_path=dst)
+                    src=join(src, self.test_file),
+                    dst=dst)
                 self.read_verify_location(dst)
 
     def write_location(self, path):
@@ -161,14 +161,15 @@ class DmvrPosixTypesTest(DataMoverTestBase):
 
         """
         if path.startswith('daos:'):
-            param_type = 'DAOS'
+            api = 'DFS'
             pool, cont, path = parse_path(path)
             path = path or '/'
         else:
-            param_type = 'POSIX'
+            api = 'POSIX'
             pool = None
             cont = None
-        self.run_ior_with_params(param_type, path, pool, cont, self.test_file, self.ior_flags[0])
+        path = join(path, self.test_file.lstrip('/'))
+        self.run_ior_with_params(api, path, pool, cont, flags=self.ior_flags[0])
 
     def read_verify_location(self, path):
         """Read and verify the test data using ior.
@@ -178,14 +179,15 @@ class DmvrPosixTypesTest(DataMoverTestBase):
 
         """
         if path.startswith('daos:'):
-            param_type = 'DAOS'
+            api = 'DFS'
             pool, cont, path = parse_path(path)
             path = path or '/'
         else:
-            param_type = 'POSIX'
+            api = 'POSIX'
             pool = None
             cont = None
-        self.run_ior_with_params(param_type, path, pool, cont, self.test_file, self.ior_flags[1])
+        path = join(path, self.test_file.lstrip('/'))
+        self.run_ior_with_params(api, path, pool, cont, flags=self.ior_flags[1])
 
     def test_dm_posix_types_dcp(self):
         """

@@ -4,7 +4,9 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
 from os.path import join
+
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrNegativeSpaceTest(DataMoverTestBase):
@@ -41,15 +43,14 @@ class DmvrNegativeSpaceTest(DataMoverTestBase):
         self.run_ior_with_params("POSIX", src_posix_file)
 
         # Create destination test pool and container
-        dst_pool = self.create_pool()
+        dst_pool = self.get_pool(connect=False)
         dst_cont = self.get_container(dst_pool)
-        dst_daos_path = "/"
 
         # Try to copy, and expect a proper error message.
         self.run_datamover(
-            self.test_id + " (dst pool out of space)",
-            "POSIX", src_posix_path, None, None,
-            "DAOS_UUID", dst_daos_path, dst_pool, dst_cont,
+            "(dst pool out of space)",
+            src=src_posix_path,
+            dst=format_path(dst_pool, dst_cont),
             expected_rc=1,
             expected_output=[self.MFU_ERR_DCP_COPY, "errno=28"])
 
@@ -58,8 +59,8 @@ class DmvrNegativeSpaceTest(DataMoverTestBase):
 
         # Try to copy. For now, we expect this to just abort.
         self.run_datamover(
-            self.test_id + " (dst posix out of space)",
-            "POSIX", src_posix_path, None, None,
-            "POSIX", dst_posix_path,
+            "(dst posix out of space)",
+            src=src_posix_path,
+            dst=dst_posix_path,
             expected_rc=255,
             expected_err=["errno=28"])

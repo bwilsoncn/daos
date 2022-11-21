@@ -1,11 +1,12 @@
-#!/usr/bin/python
 '''
   (C) Copyright 2020-2022 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
 import os
+
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 # pylint: disable=too-many-ancestors
@@ -47,41 +48,39 @@ class DmvrPosixLargeFile(DataMoverTestBase):
         cont1 = self.get_container(pool)
 
         # create initial data in cont1
-        self.run_ior_with_params("DAOS", self.ior_cmd.test_file.value, pool, cont1)
+        self.run_ior_with_params("DFS", self.ior_cmd.test_file.value, pool, cont1)
 
         # create cont2
         cont2 = self.get_container(pool)
 
         # copy from daos cont1 to cont2
         self.run_datamover(
-            self.test_id + " (cont1 to cont2)",
-            "DAOS", "/", pool, cont1,
-            "DAOS", "/", pool, cont2)
+            "(cont1 to cont2)",
+            src=format_path(pool, cont1),
+            dst=format_path(pool, cont2))
 
         posix_path = self.new_posix_test_path()
 
         # copy from daos cont2 to posix file system
         self.run_datamover(
-            self.test_id + " (cont2 to posix)",
-            "DAOS", "/", pool, cont2,
-            "POSIX", posix_path)
+            "(cont2 to posix)",
+            src=format_path(pool, cont2),
+            dst=posix_path)
 
         # create cont3
         cont3 = self.get_container(pool)
 
         # copy from posix file system to daos cont3
         self.run_datamover(
-            self.test_id + " (posix to cont3)",
-            "POSIX", posix_path, None, None,
-            "DAOS", "/", pool, cont3)
+            "(posix to cont3)",
+            src=posix_path,
+            dst=format_path(pool, cont3))
 
         # the result is that a NEW directory is created in the destination
         daos_path = "/" + os.path.basename(posix_path) + self.ior_cmd.test_file.value
 
         # update ior params, read back and verify data from cont3
-        self.run_ior_with_params(
-            "DAOS", daos_path, pool, cont3,
-            flags="-r -R")
+        self.run_ior_with_params("DFS", daos_path, pool, cont3, flags="-r -R")
 
     def test_dm_large_file_dcp(self):
         """Jira ID: DAOS-4782.

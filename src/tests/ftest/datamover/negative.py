@@ -58,7 +58,7 @@ class DmvrNegativeTest(DataMoverTestBase):
         self.set_tool("DCP")
 
         # Start dfuse to hold all pools/containers
-        self.start_dfuse(self.dfuse_hosts)
+        self.start_dfuse(self.hostlist_clients)
 
         # Create a test pool
         pool1 = self.create_pool()
@@ -72,114 +72,114 @@ class DmvrNegativeTest(DataMoverTestBase):
 
         # Create test files
         self.run_ior_with_params("POSIX", self.posix_test_file)
-        self.run_ior_with_params("DAOS_UUID", self.daos_test_file, pool1, cont1)
+        self.run_ior_with_params("DFS", self.daos_test_file, pool1, cont1)
 
         # Bad parameter: required arguments.
         self.run_datamover(
-            self.test_id + " (missing source pool)",
-            src_path=format_path(),
-            dst_path=self.posix_local_test_paths[0],
+            "(missing source pool)",
+            src=format_path(),
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         self.run_datamover(
-            self.test_id + " (missing source cont)",
-            src_path=format_path(pool1),
-            dst_path=self.posix_local_test_paths[0],
+            "(missing source cont)",
+            src=format_path(pool1),
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         self.run_datamover(
-            self.test_id + " (missing dest pool)",
-            src_path=self.posix_local_test_paths[0],
-            dst_path=format_path(),
+            "(missing dest pool)",
+            src=self.posix_local_test_paths[0],
+            dst=format_path(),
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         # (2) Bad parameter: source is destination.
         self.run_datamover(
-            self.test_id + " (UUID source is UUID dest)",
-            src_path=format_path(pool1.uuid, cont1.uuid),
-            dst_path=format_path(pool1.uuid, cont1.uuid),
+            "(UUID source is UUID dest)",
+            src=format_path(pool1.uuid, cont1.uuid),
+            dst=format_path(pool1.uuid, cont1.uuid),
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         self.run_datamover(
-            self.test_id + " (UNS source is UNS dest)",
-            src_path=cont1.path.value,
-            dst_path=cont1.path.value,
+            "(UNS source is UNS dest)",
+            src=cont1.path.value,
+            dst=cont1.path.value,
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         self.run_datamover(
-            self.test_id + " (UUID source is UNS dest)",
-            src_path=format_path(pool1.uuid, cont1.uuid),
-            dst_path=cont1.path.value,
+            "(UUID source is UNS dest)",
+            src=format_path(pool1.uuid, cont1.uuid),
+            dst=cont1.path.value,
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         self.run_datamover(
-            self.test_id + " (UNS source is UUID dest)",
-            src_path=cont1.path.value,
-            dst_path=format_path(pool1.uuid, cont1.uuid),
+            "(UNS source is UUID dest)",
+            src=cont1.path.value,
+            dst=format_path(pool1.uuid, cont1.uuid),
             expected_rc=1,
             expected_output=self.MFU_ERR_DAOS_INVAL_ARG)
 
         # (3) Bad parameter: UUID, UNS, or POSIX path does not exist.
         fake_uuid = str(uuid.UUID(int=0))
         self.run_datamover(
-            self.test_id + " (invalid source pool)",
-            src_path=format_path(fake_uuid, cont1),
-            dst_path=self.posix_local_test_paths[0],
+            "(invalid source pool)",
+            src=format_path(fake_uuid, cont1),
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output="DER_NONEXIST")
 
         self.run_datamover(
-            self.test_id + " (invalid source cont)",
-            src_path=format_path(pool1, fake_uuid),
-            dst_path=self.posix_local_test_paths[0],
+            "(invalid source cont)",
+            src=format_path(pool1, fake_uuid),
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output="DER_NONEXIST")
 
         self.run_datamover(
-            self.test_id + " (invalid dest pool)",
-            src_path=self.posix_local_test_paths[0],
-            dst_path=format_path(fake_uuid, cont1),
+            "(invalid dest pool)",
+            src=self.posix_local_test_paths[0],
+            dst=format_path(fake_uuid, cont1),
             expected_rc=1,
             expected_output="DER_NONEXIST")
 
         self.run_datamover(
-            self.test_id + " (invalid source cont path)",
-            src_path=format_path(pool1, cont1, "/fake/fake"),
-            dst_path=self.posix_local_test_paths[0],
+            "(invalid source cont path)",
+            src=format_path(pool1, cont1, "/fake/fake"),
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output="No such file or directory")
 
         self.run_datamover(
-            self.test_id + " (invalid source cont UNS path)",
-            src_path=cont1.path.value + "/fake/fake",
-            dst_path=self.posix_local_test_paths[0],
+            "(invalid source cont UNS path)",
+            src=cont1.path.value + "/fake/fake",
+            dst=self.posix_local_test_paths[0],
             expected_rc=1,
             expected_output="No such file or directory")
 
         self.run_datamover(
-            self.test_id + " (invalid dest cont path)",
-            src_path=self.posix_local_test_paths[0],
-            dst_path=format_path(pool1, cont1, "/fake/fake"),
+            "(invalid dest cont path)",
+            src=self.posix_local_test_paths[0],
+            dst=format_path(pool1, cont1, "/fake/fake"),
             expected_rc=1,
             expected_output="No such file or directory")
 
         self.run_datamover(
-            self.test_id + " (invalid source posix path)",
-            src_path="/fake/fake",
-            dst_path=format_path(pool1, cont1),
+            "(invalid source posix path)",
+            src="/fake/fake",
+            dst=format_path(pool1, cont1),
             expected_rc=1,
             expected_output="No such file or directory")
 
         self.run_datamover(
-            self.test_id + " (invalid dest posix path)",
-            src_path=format_path(pool1, cont1),
-            dst_path="/fake/fake",
+            "(invalid dest posix path)",
+            src=format_path(pool1, cont1),
+            dst="/fake/fake",
             expected_rc=1,
             expected_output="No such file or directory")
 
@@ -201,13 +201,13 @@ class DmvrNegativeTest(DataMoverTestBase):
         cont1 = self.get_container(pool1)
 
         # Create source file
-        self.run_ior_with_params("DAOS_UUID", self.daos_test_file, pool1, cont1)
+        self.run_ior_with_params("DFS", self.daos_test_file, pool1, cont1)
 
         # Use a really long filename
         dst_path = join(self.posix_local_test_paths[0], "d" * 300)
         self.run_datamover(
-            self.test_id + " (filename is too long)",
-            src_path=format_path(pool1, cont1),
-            dst_path=dst_path,
+            "(filename is too long)",
+            src=format_path(pool1, cont1),
+            dst=dst_path,
             expected_rc=1,
             expected_output=[self.MFU_ERR_DCP_COPY, "errno=36"])

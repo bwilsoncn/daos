@@ -7,6 +7,7 @@ from pydaos.raw import DaosApiError
 import avocado
 
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrObjSmallTest(DataMoverTestBase):
@@ -72,9 +73,9 @@ class DmvrObjSmallTest(DataMoverTestBase):
 
         # Clone cont1 to a new cont2 in pool1
         result = self.run_datamover(
-            self.test_id + " (cont1->cont2) (same pool)",
-            "DAOS_UUID", None, pool1, cont1,
-            "DAOS_UUID", None, pool1, None)
+            "(cont1->cont2) (same pool)",
+            src=format_path(pool1, cont1),
+            dst=format_path(pool1))
         cont2_label = self.parse_create_cont_label(result.stdout_text)
 
         # Verify data in cont2
@@ -90,9 +91,9 @@ class DmvrObjSmallTest(DataMoverTestBase):
 
         # Clone cont1 to a new cont3 in pool2
         result = self.run_datamover(
-            self.test_id + " (cont1->cont3) (different pool)",
-            "DAOS_UUID", None, pool1, cont1,
-            "DAOS_UUID", None, pool2, None)
+            "(cont1->cont3) (different pool)",
+            src=format_path(pool1, cont1),
+            dst=format_path(pool2))
         cont3_label = self.parse_create_cont_label(result.stdout_text)
         # Verify data in cont3
         cont3 = self.get_cont(pool2, cont3_label)

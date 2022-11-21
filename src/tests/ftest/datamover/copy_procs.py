@@ -4,7 +4,9 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
 from os.path import join
+
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrCopyProcs(DataMoverTestBase):
@@ -59,25 +61,27 @@ class DmvrCopyProcs(DataMoverTestBase):
         dst_posix = join(self.new_posix_test_path(), self.test_file)
 
         # Create the test files
-        self.run_ior_with_params("DAOS", src_daos, pool1, cont1, flags=self.ior_flags[0])
+        self.run_ior_with_params("DFS", src_daos, pool1, cont1, flags=self.ior_flags[0])
         self.run_ior_with_params("POSIX", src_posix, flags=self.ior_flags[0])
 
         # DAOS -> POSIX
         # Run with varying number of processes
-        self.set_datamover_params(
-            "DAOS_UUID", src_daos, pool1, cont1,
-            "POSIX", dst_posix)
         for num_procs in procs_list:
             test_desc = "copy_procs (DAOS->POSIX with {} procs)".format(num_procs)
-            self.run_datamover(test_desc=test_desc, processes=num_procs)
+            self.run_datamover(
+                test_desc=test_desc,
+                src=format_path(pool1, cont1, src_daos),
+                dst=dst_posix,
+                processes=num_procs)
             self.run_ior_with_params("POSIX", dst_posix, flags=self.ior_flags[1])
 
         # POSIX -> DAOS
         # Run with varying number of processes
-        self.set_datamover_params(
-            "POSIX", src_posix, None, None,
-            "DAOS_UUID", dst_daos, pool1, cont2)
         for num_procs in procs_list:
             test_desc = "copy_procs (POSIX->DAOS with {} procs)".format(num_procs)
-            self.run_datamover(test_desc=test_desc, processes=num_procs)
-            self.run_ior_with_params("DAOS_UUID", dst_daos, pool1, cont2, flags=self.ior_flags[1])
+            self.run_datamover(
+                test_desc=test_desc,
+                src=src_posix,
+                dst=format_path(pool1, cont2, dst_daos),
+                processes=num_procs)
+            self.run_ior_with_params("DFS", dst_daos, pool1, cont2, flags=self.ior_flags[1])

@@ -43,53 +43,12 @@ class MfuCommandBase(ExecutableCommand):
         self.hosts = hosts
         self.tmp = tmp
 
-    def set_params(self, **kwargs):
-        """Set any Parameters for the class.
-
-        Args:
-            kwargs: name, value pairs of class Parameters
-
-        """
-        for k, v in kwargs.items():
-            attr = getattr(self, k)
-            attr.update(v, k)
-
-    @staticmethod
-    def __param_sort(k):
-        """Key sort for get_param_names. Moves src and dst
-           to the end of the list.
-
-        Args:
-            k (str): the key
-
-        Returns:
-            int: the sort priority
-
-        """
-        return {
-            'dst': 3,
-            'src': 2
-        }.get(k, 0)
-
-    def get_param_names(self):
-        """Override the original get_param_names to sort
-           the src and dst paths.
-
-        Returns:
-            list: the sorted param names.
-
-        """
-        param_names = super().get_param_names()
-        param_names.sort(key=self.__param_sort)
-        return param_names
-
-    def run(self, processes, job_manager, ppn=None):
-        # pylint: disable=arguments-differ
+    def run(self, processes, ppn=None):
+        # pylint: disable=arguments-differ,arguments-renamed
         """Run the MpiFileUtils command.
 
         Args:
             processes (int): Number of processes for the command.
-            job_manager (JobManager): Job manager variable to set/assign
             ppn (int, optional): client processes per node for the command.
 
         Returns:
@@ -112,9 +71,7 @@ class MfuCommandBase(ExecutableCommand):
         job_manager.exit_status_exception = self.exit_status_exception
 
         # Run the command
-        out = job_manager.run()
-
-        return out
+        return job_manager.run()
 
 
 class DcpCommand(MfuCommandBase):
@@ -155,9 +112,9 @@ class DcpCommand(MfuCommandBase):
         # print help/usage
         self.print_usage = FormattedParameter("--help", False)
         # source path
-        self.src = BasicParameter(None)
+        self.src = BasicParameter(None, position=1)
         # destination path
-        self.dst = BasicParameter(None)
+        self.dst = BasicParameter(None, position=2)
 
 
 class DsyncCommand(MfuCommandBase):
@@ -202,9 +159,9 @@ class DsyncCommand(MfuCommandBase):
         # print help/usage
         self.print_usage = FormattedParameter("--help", False)
         # source path
-        self.src = BasicParameter(None)
+        self.src = BasicParameter(None, position=1)
         # destination path
-        self.dst = BasicParameter(None)
+        self.dst = BasicParameter(None, position=2)
 
 
 class DserializeCommand(MfuCommandBase):
@@ -225,7 +182,7 @@ class DserializeCommand(MfuCommandBase):
         # print help/usage
         self.print_usage = FormattedParameter("--help", False)
         # source path
-        self.src = BasicParameter(None)
+        self.src = BasicParameter(None, position=1)
 
 
 class DdeserializeCommand(MfuCommandBase):
@@ -237,7 +194,7 @@ class DdeserializeCommand(MfuCommandBase):
 
         # daos-deserialize options
 
-        # pool uuid for containers
+        # pool uuid or label for containers
         self.pool = FormattedParameter("--pool {}")
         # verbose output
         self.verbose = FormattedParameter("--verbose", False)
@@ -246,111 +203,4 @@ class DdeserializeCommand(MfuCommandBase):
         # print help/usage
         self.print_usage = FormattedParameter("--help", False)
         # source path
-        self.src = BasicParameter(None)
-
-
-class FsCopy():
-    """Class defining an object of type FsCopy.
-       Allows interfacing with daos fs copy in a similar
-       manner to DcpCommand.
-
-    """
-
-    def __init__(self, daos_cmd, log):
-        """Create a FsCopy object.
-
-        Args:
-            daos_cmd (DaosCommand): daos command to issue the filesystem
-                copy command.
-            log (TestLogger): logger to log messages
-
-        """
-        self.src = None
-        self.dst = None
-        self.preserve_props = None
-        self.daos_cmd = daos_cmd
-        self.log = log
-
-    def set_params(self, src=None, dst=None, preserve_props=None):
-        """Set the daos fs copy params.
-
-        Args:
-            src (str, optional): The source path formatted as
-                daos://<pool>/<cont>/<path> or <path>
-            dst (str, optional): The destination path formatted as
-                daos://<pool>/<cont>/<path> or <path>
-
-        """
-        if src:
-            self.src = src
-        if dst:
-            self.dst = dst
-        if preserve_props:
-            self.preserve_props = preserve_props
-
-    def run(self):
-        # pylint: disable=arguments-differ
-        """Run the daos fs copy command.
-
-        Returns:
-            CmdResult: Object that contains exit status, stdout, and other
-                information.
-
-        Raises:
-            CommandFailure: In case daos fs copy run command fails
-
-        """
-        self.log.info("Starting daos filesystem copy")
-
-        return self.daos_cmd.filesystem_copy(src=self.src, dst=self.dst,
-                                             preserve_props=self.preserve_props)
-
-
-class ContClone():
-    """Class defining an object of type ContClone.
-       Allows interfacing with daos container copy in a similar
-       manner to DcpCommand.
-    """
-
-    def __init__(self, daos_cmd, log):
-        """Create a ContClone object.
-
-        Args:
-            daos_cmd (DaosCommand): daos command to issue the cont clone
-                command.
-            log (TestLogger): logger to log messages
-
-        """
-        self.src = None
-        self.dst = None
-        self.daos_cmd = daos_cmd
-        self.log = log
-
-    def set_params(self, src=None, dst=None):
-        """Set the daos container clone params.
-
-        Args:
-            src (str, optional): the src, formatted as /<pool>/<cont>
-            dst (str, optional): the dst, formatted as /<pool>/<cont>
-
-        """
-        if src:
-            self.src = src
-        if dst:
-            self.dst = dst
-
-    def run(self):
-        # pylint: disable=arguments-differ
-        """Run the daos container clone command.
-
-        Returns:
-            CmdResult: Object that contains exit status, stdout, and other
-                information.
-
-        Raises:
-            CommandFailure: In case daos container clone run command fails.
-
-        """
-        self.log.info("Starting daos container clone")
-
-        return self.daos_cmd.container_clone(src=self.src, dst=self.dst)
+        self.src = BasicParameter(None, position=1)

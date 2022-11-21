@@ -10,11 +10,15 @@ import time
 import random
 import threading
 import re
+
+from ClusterShell.NodeSet import NodeSet
+from avocado.core.exceptions import TestFail
+from pydaos.raw import DaosSnapshot, DaosApiError
+
 from ior_utils import IorCommand
 from fio_utils import FioCommand
 from mdtest_utils import MdtestCommand
 from daos_racer_utils import DaosRacerCommand
-from data_mover_utils import FsCopy
 from dfuse_utils import Dfuse
 from job_manager_utils import Srun, Mpirun
 from general_utils import get_host_data, get_random_string, \
@@ -24,9 +28,6 @@ from command_utils_base import EnvironmentVariables
 import slurm_utils
 from daos_utils import DaosCommand
 from test_utils_container import TestContainer
-from ClusterShell.NodeSet import NodeSet
-from avocado.core.exceptions import TestFail
-from pydaos.raw import DaosSnapshot, DaosApiError
 from macsio_util import MacsioCommand
 from oclass_utils import extract_redundancy_factor
 
@@ -105,24 +106,20 @@ def reserved_file_copy(self, file, pool, container, num_bytes=None, cmd="read"):
                     (daos->posix) or write(posix -> daos)
     """
     os.makedirs(os.path.dirname(file), exist_ok=True)
-    fscopy_cmd = FsCopy(self.get_daos_command(), self.log)
     # writes random data to file and then copy the file to container
     if cmd == "write":
         with open(file, 'w') as src_file:
             src_file.write(str(os.urandom(num_bytes)))
             src_file.close()
         dst_file = "daos://{}/{}".format(pool.uuid, container.uuid)
-        fscopy_cmd.set_params(src=file, dst=dst_file)
-        fscopy_cmd.run()
+        self.get_daos_command().filesystem_copy(src=file, dst=dst_file)
     # reads file_name from container and writes to file
     elif cmd == "read":
         dst = os.path.split(file)
         dst_name = dst[-1]
         dst_path = dst[0]
-        src_file = "daos://{}/{}/{}".format(
-            pool.uuid, container.uuid, dst_name)
-        fscopy_cmd.set_params(src=src_file, dst=dst_path)
-        fscopy_cmd.run()
+        src_file = "daos://{}/{}/{}".format(pool.uuid, container.uuid, dst_name)
+        self.get_daos_command().filesystem_copy(src=src_file, dst=dst_path)
 
 
 def get_remote_dir(self, source_dir, dest_dir, host_list, shared_dir=None,

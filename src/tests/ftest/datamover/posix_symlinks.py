@@ -1,11 +1,12 @@
-#!/usr/bin/python
 '''
   (C) Copyright 2020-2022 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
 from os.path import join
+
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrPosixSymlinks(DataMoverTestBase):
@@ -55,7 +56,7 @@ class DmvrPosixSymlinks(DataMoverTestBase):
         self.set_tool(tool)
 
         # Start dfuse to hold all pools/containers
-        self.start_dfuse(self.dfuse_hosts)
+        self.start_dfuse(self.hostlist_clients)
 
         # Create 1 pool
         pool1 = self.create_pool()
@@ -98,7 +99,7 @@ class DmvrPosixSymlinks(DataMoverTestBase):
             "dereference", "/run/{}/*".format(self.tool.lower()))
 
         # Use a common test_desc
-        test_desc = self.test_id + "({})".format(link_desc)
+        test_desc = "({})".format(link_desc)
         test_desc += " (dereference={})".format(str(do_deref))
         self.log.info("Running %s", test_desc)
 
@@ -125,27 +126,27 @@ class DmvrPosixSymlinks(DataMoverTestBase):
             diff_src = src_posix_path
 
         # DAOS -> DAOS
-        dst_daos_dir = self.new_daos_test_path(create=False)
+        dst_daos_dir = self.new_daos_test_path()
         self.run_datamover(
             test_desc + " (DAOS->DAOS)",
-            "DAOS", src_daos_dir, pool, cont,
-            "DAOS", dst_daos_dir, pool, cont)
+            src=format_path(pool, cont, src_daos_dir),
+            dst=format_path(pool, cont, dst_daos_dir))
         self.run_diff(diff_src, cont.path.value + dst_daos_dir, do_deref)
 
         # DAOS -> POSIX
         dst_posix_path = self.new_posix_test_path(create=False)
         self.run_datamover(
             test_desc + " (DAOS->POSIX)",
-            "DAOS", src_daos_dir, pool, cont,
-            "POSIX", dst_posix_path)
+            src=format_path(pool, cont, src_daos_dir),
+            dst=dst_posix_path)
         self.run_diff(diff_src, dst_posix_path)
 
         # POSIX -> DAOS
-        dst_daos_dir = self.new_daos_test_path(create=False)
+        dst_daos_dir = self.new_daos_test_path()
         self.run_datamover(
             test_desc + " (POSIX->DAOS)",
-            "POSIX", src_posix_path, None, None,
-            "DAOS", dst_daos_dir, pool, cont)
+            src=src_posix_path,
+            dst=format_path(pool, cont, dst_daos_dir))
         self.run_diff(diff_src, cont.path.value + dst_daos_dir, do_deref)
 
     def create_links_forward(self, path):

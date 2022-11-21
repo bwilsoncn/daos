@@ -7,6 +7,7 @@ from pydaos.raw import DaosApiError
 import avocado
 
 from data_mover_test_base import DataMoverTestBase
+from duns_utils import format_path
 
 
 class DmvrSerialSmall(DataMoverTestBase):
@@ -74,9 +75,9 @@ class DmvrSerialSmall(DataMoverTestBase):
 
         # Serialize/Deserialize cont1 to a new cont2 in pool2
         result = self.run_datamover(
-            self.test_id + " (cont1->HDF5->cont2)",
-            "DAOS_UUID", None, pool1, cont1,
-            "DAOS_UUID", None, pool2, None)
+            "(cont1->HDF5->cont2)",
+            src=format_path(pool1, cont1),
+            pool=pool2.identifier)
 
         # Get the destination cont2 uuid
         cont2_label = self.parse_create_cont_label(result.stdout_text)
