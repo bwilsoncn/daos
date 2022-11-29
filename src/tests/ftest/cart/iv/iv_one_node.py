@@ -485,9 +485,7 @@ class CartIvOneNodeTest(CartTest):
             self.print("TEST FAILED: %s" % str(exception))
 
         # Shutdown Servers
-
-        num_servers = self.get_srv_cnt("test_servers")
-
+        num_servers = 1
         srv_ppn = self.params.get("test_servers_ppn", '/run/tests/*/')
 
         # Note: due to CART-408 issue, rank 0 needs to shutdown last
