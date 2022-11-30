@@ -4,7 +4,6 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 """
 from rebuild_test_base import RebuildTestBase
-from daos_utils import DaosCommand
 
 
 class RbldCascadingFailures(RebuildTestBase):
@@ -18,7 +17,6 @@ class RbldCascadingFailures(RebuildTestBase):
         """Initialize a CascadingFailures object."""
         super().__init__(*args, **kwargs)
         self.mode = None
-        self.daos_cmd = None
 
     def create_test_container(self):
         """Create a container and write objects."""
@@ -70,15 +68,12 @@ class RbldCascadingFailures(RebuildTestBase):
 
     def execute_during_rebuild(self):
         """Execute test steps during rebuild."""
-        self.daos_cmd = DaosCommand(self.bin)
         if self.mode == "cascading":
             # Exclude the second rank from the pool during rebuild
             self.server_managers[0].stop_ranks(
                 [self.inputs.rank.value[1]], self.d_log)
 
-        self.daos_cmd.container_set_prop(pool=self.pool.uuid,
-                                         cont=self.container.uuid,
-                                         prop="status", value="healthy")
+        self.container.set_prop(prop="status", value="healthy")
         # Populate the container with additional data during rebuild
         self.container.write_objects(obj_class=self.inputs.object_class.value)
 
@@ -98,7 +93,7 @@ class RbldCascadingFailures(RebuildTestBase):
         :avocado: tags=all,full_regression
         :avocado: tags=vm
         :avocado: tags=rebuild
-        :avocado: tags=multitarget,simultaneous,test_simultaneous_failures
+        :avocado: tags=RbldCascadingFailures,multitarget,simultaneous,test_simultaneous_failures
         """
         self.mode = "simultaneous"
         self.execute_rebuild_test()
@@ -120,7 +115,7 @@ class RbldCascadingFailures(RebuildTestBase):
         :avocado: tags=all,full_regression
         :avocado: tags=vm
         :avocado: tags=rebuild
-        :avocado: tags=multitarget,sequential,test_sequential_failures
+        :avocado: tags=RbldCascadingFailures,multitarget,sequential,test_sequential_failures
         """
         self.mode = "sequential"
         self.execute_rebuild_test()
@@ -142,7 +137,7 @@ class RbldCascadingFailures(RebuildTestBase):
         :avocado: tags=all,full_regression
         :avocado: tags=vm
         :avocado: tags=rebuild
-        :avocado: tags=multitarget,cascading,test_cascading_failures
+        :avocado: tags=RbldCascadingFailures,multitarget,cascading,test_cascading_failures
         """
         self.mode = "cascading"
         self.execute_rebuild_test()

@@ -1,14 +1,13 @@
-#!/usr/bin/python3
 '''
-  (C) Copyright 2018-2022 Intel Corporation.
+  (C) Copyright 2018-2023 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 '''
 import ctypes
 
-from apricot import TestWithServers
 from pydaos.raw import daos_cref, DaosApiError, conversion, DaosContPropEnum
-from test_utils_container import TestContainer
+
+from apricot import TestWithServers
 
 
 class QueryPropertiesTest(TestWithServers):
@@ -40,9 +39,8 @@ class QueryPropertiesTest(TestWithServers):
         """
         errors = []
 
-        self.add_pool()
-        self.container = TestContainer(pool=self.pool)
-        self.container.get_params(self)
+        self.pool = self.get_pool()
+        self.container = self.get_container(self.pool, label=None, create=False)
 
         # Prepare DaosContProperties. Update some items from default. These are
         # properties that determine the values, not the actual values. The actual values

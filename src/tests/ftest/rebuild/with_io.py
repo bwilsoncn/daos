@@ -1,11 +1,9 @@
-#!/usr/bin/python3
 """
   (C) Copyright 2018-2022 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 """
 from apricot import TestWithServers
-from daos_utils import DaosCommand
 
 
 class RbldWithIO(TestWithServers):
@@ -17,10 +15,6 @@ class RbldWithIO(TestWithServers):
 
     :avocado: recursive
     """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.daos_cmd = None
 
     def test_rebuild_with_io(self):
         """JIRA ID: Rebuild-003.
@@ -79,11 +73,7 @@ class RbldWithIO(TestWithServers):
         # Wait for recovery to start
         self.pool.wait_for_rebuild(True)
 
-        self.daos_cmd = DaosCommand(self.bin)
-        self.daos_cmd.container_set_prop(pool=self.pool.uuid,
-                                         cont=self.container.uuid,
-                                         prop="status",
-                                         value="healthy")
+        self.container.set_prop(prop="status", value="healthy")
 
         # Write data to the container for another 30 seconds
         self.log.info(

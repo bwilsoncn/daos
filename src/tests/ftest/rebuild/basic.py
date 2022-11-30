@@ -1,10 +1,9 @@
 """
-  (C) Copyright 2018-2022 Intel Corporation.
+  (C) Copyright 2018-2023 Intel Corporation.
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 """
 from apricot import TestWithServers
-from daos_utils import DaosCommand
 
 
 class RbldBasic(TestWithServers):
@@ -16,10 +15,6 @@ class RbldBasic(TestWithServers):
     :avocado: recursive
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.daos_cmd = None
-
     def run_rebuild_test(self, pool_quantity):
         """Run the rebuild test for the specified number of pools.
 
@@ -29,7 +24,6 @@ class RbldBasic(TestWithServers):
         # Get the test parameters
         self.pool = []
         self.container = []
-        self.daos_cmd = DaosCommand(self.bin)
         for _ in range(pool_quantity):
             self.pool.append(self.get_pool(create=False))
             self.container.append(
@@ -115,9 +109,7 @@ class RbldBasic(TestWithServers):
 
         # Verify the data after rebuild
         for index in range(pool_quantity):
-            self.daos_cmd.container_set_prop(pool=self.pool[index].uuid,
-                                             cont=self.container[index].uuid,
-                                             prop="status", value="healthy")
+            self.container[index].set_prop(prop="status", value="healthy")
             if self.container[index].object_qty.value != 0:
                 self.assertTrue(
                     self.container[index].read_objects(),
@@ -135,8 +127,8 @@ class RbldBasic(TestWithServers):
 
         :avocado: tags=all,daily_regression
         :avocado: tags=vm
-        :avocado: tags=rebuild
-        :avocado: tags=pool,rebuild_tests,test_simple_rebuild
+        :avocado: tags=rebuild,pool
+        :avocado: tags=RbldBasic,rebuild_tests,test_simple_rebuild
         """
         self.run_rebuild_test(1)
 
@@ -147,11 +139,11 @@ class RbldBasic(TestWithServers):
             Expand on the basic test by rebuilding 2 pools at once.
 
         Use Cases:
-            multipool rebuild, single client, various object and record counts
+            multi-pool rebuild, single client, various object and record counts
 
         :avocado: tags=all,daily_regression
         :avocado: tags=vm
-        :avocado: tags=rebuild
-        :avocado: tags=pool,rebuild_tests,test_multipool_rebuild
+        :avocado: tags=rebuild,pool
+        :avocado: tags=RbldBasic,rebuild_tests,test_multipool_rebuild
         """
         self.run_rebuild_test(self.params.get("quantity", "/run/testparams/*"))
