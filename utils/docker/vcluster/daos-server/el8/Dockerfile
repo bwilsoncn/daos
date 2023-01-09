@@ -1,11 +1,11 @@
-# Copyright 2021-2022 Intel Corporation
+# Copyright 2021-2023 Intel Corporation
 # All rights reserved.
 #
 # 'recipe' for building a RHEL variant docker image of a DAOS server node
 #
 # This Dockerfile accept the following input build arguments:
 # - DAOS_BASE_IMAGE      Base docker image to use (default "daos-base")
-# - DAOS_BASE_VERSION    Version of the base docker image to use (default "rocky8.4")
+# - DAOS_BASE_VERSION    Version of the base docker image to use (default "rocky8.6")
 # - DAOS_AUTH            Enable DAOS authentication when set to "yes" (default "yes")
 # - DAOS_HUGEPAGES_NBR   Number of huge pages to allocate for SPDK (default 4096)
 # - DAOS_IFACE_NAME      Fabric network interface used by the DAOS engine (default "eth0")
@@ -14,7 +14,7 @@
 
 # Pull base image
 ARG	DAOS_BASE_IMAGE=daos-base
-ARG	DAOS_BASE_VERSION=rocky8.4
+ARG	DAOS_BASE_VERSION=rocky8.6
 FROM	$DAOS_BASE_IMAGE:$DAOS_BASE_VERSION
 LABEL	maintainer="daos@daos.groups.io"
 
