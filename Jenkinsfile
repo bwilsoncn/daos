@@ -837,10 +837,10 @@ pipeline {
                     } // post
                 } // stage('Functional on Leap 15.4')
                 stage('Functional on Ubuntu 20.04') {
-                    when {
+                    /* when {
                         beforeAgent true
-                        //expression { !skipStage() }
-                    }
+                        expression { !skipStage() }
+                    } */
                     agent {
                         label cachedCommitPragma(pragma: 'Ubuntu-VM9-label', def_val: params.FUNCTIONAL_VM_LABEL)
                     }
