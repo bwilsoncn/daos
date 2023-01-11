@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+#  (C) Copyright 2021-2023 Intel Corporation.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
 
 post_provision_config_nodes() {
     # should we port this to Ubuntu or just consider $CONFIG_POWER_ONLY dead?

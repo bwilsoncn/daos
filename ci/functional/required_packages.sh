@@ -3,6 +3,7 @@
 set -eux
 
 distro="$1"
+# shellcheck disable=SC2034
 client_ver="$2"
 
 if [[ $distro = ubuntu20* ]]; then
