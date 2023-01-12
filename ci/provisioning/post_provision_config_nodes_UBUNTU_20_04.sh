@@ -31,14 +31,18 @@ post_provision_config_nodes() {
             echo "deb [trusted=yes] ${JENKINS_URL}job/daos-stack/job/${repo}/job/${branch//\//%252F}/${build_number}/artifact/artifacts/ubuntu20.04 ./" >> /etc/apt/sources.list
         done
     fi
+    sed -i -e '/daos-stack-daos-ubuntu/d' /etc/apt/sources.list.d/daos_ci-ubuntu*-artifactory.list
+
     apt-get update
+
+    local inst_rpms=()
     if [ -n "$INST_RPMS" ]; then
-        # shellcheck disable=SC2086
-        if ! apt-get -y remove $INST_RPMS; then
+        eval "inst_rpms=($INST_RPMS)"
+        if ! apt-get -y remove "${inst_rpms[@]}"; then
             rc=${PIPESTATUS[0]}
-            if [ $rc -ne 100 ]; then
+            if [ "$rc" -ne 100 ]; then
                 echo "Error $rc removing $INST_RPMS"
-                return $rc
+                return "$rc"
             fi
         fi
     fi
@@ -47,9 +51,8 @@ post_provision_config_nodes() {
                        python3-avocado-plugins-varianter-yaml-to-mux \
                        lsb-core
 
-    # shellcheck disable=2086
     if [ -n "$INST_RPMS" ] &&
-       ! apt-get -y install $INST_RPMS; then
+       ! apt-get -y install "${inst_rpms[@]}"; then
         rc=${PIPESTATUS[0]}
         for file in /etc/apt/sources.list{,.d/*.list}; do
             echo "---- $file ----"

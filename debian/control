@@ -204,8 +204,7 @@ Package: daos-serialize
 Section: net
 Architecture: any
 Multi-Arch: same
-Depends: ${shlibs:Depends}, ${misc:Depends},
-         hdf5
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: The Distributed Asynchronous Object Storage (DAOS) is an open-source
  software-defined object store designed from the ground up for
  massively distributed Non Volatile Memory (NVM). DAOS takes advantage
