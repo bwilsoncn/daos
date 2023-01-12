@@ -60,6 +60,9 @@ override_dh_auto_install:
 	install -m 644 utils/systemd/daos_agent.service ${buildroot}$(prefix)/lib/systemd/system
 	mkdir -p ${buildroot}$(sysconfdir)/daos/certs/clients
 	mv ${buildroot}$(sysconfdir)/daos/bash_completion.d ${buildroot}$(sysconfdir)/
+	# DO NOT LAND
+	# hack until we have daos-serialize.so properly building
+	touch ${buildroot}$(prefix)/lib64/libdaos_serialize.so
 
 override_dh_missing:
 	# we want builds to break if files are unpackaged
