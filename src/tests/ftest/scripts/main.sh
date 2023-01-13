@@ -45,8 +45,8 @@ export D_LOG_FILE="$TEST_TAG_DIR/daos.log"
 
 # apply patches to Avocado
 pydir=""
-for loc in /usr/lib/python2*/site-packages/ \
-           /usr/lib/python3*/site-packages/ \
+for loc in /usr/lib/python2*/{dist,site}-packages/ \
+           /usr/lib/python3*/{dist,site}-packages/ \
            /usr/local/lib/python3*/site-packages/; do
     if [ -f "$loc"/avocado/core/runner.py ]; then
         pydir=$loc
