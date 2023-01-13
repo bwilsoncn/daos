@@ -7,7 +7,9 @@ distro="$1"
 client_ver="$2"
 
 if [[ $distro = ubuntu20* ]]; then
-    pkgs="openmpi-bin ndctl fio"
+    #pkgs="openmpi-bin ndctl fio"
+    # these should be package dependencies
+    pkgs=""
 elif [[ $distro = el* ]] || [[ $distro = centos* ]] ||
      [[ $distro = leap* ]]; then
     openmpi="openmpi"
