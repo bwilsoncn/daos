@@ -70,7 +70,7 @@ override_dh_auto_install:
 	# hack: how do we get these all installed in the right place?
 	mkdir -p ${buildroot}$(prefix)/lib/python3.8/
 	mv ${buildroot}$(prefix)/lib64/python3.8/site-packages/* ${buildroot}$(prefix)/lib/python3.8/
-	mv ${buildroot}$(prefix)/lib64/{daos_srv,lib*.so*} ${buildroot}/lib/x86_64-linux-gnu/
+	mv ${buildroot}$(prefix)/lib64/lib*.so* ${buildroot}$(prefix)/lib64/daos_srv ${buildroot}/lib/x86_64-linux-gnu/
 
 override_dh_missing:
 	# we want builds to break if files are unpackaged
