@@ -2,13 +2,13 @@ daos (2.3.101-5) unstable; urgency=medium
   [Joseph Moore]
   * Update Mercury version to 2.2.0-6
 
- -- Joseph Moore <joseph.moored@intel.com>  Tue, Dec 6 2022 12:15:00 - 0400
+ -- Joseph Moore <joseph.moore@intel.com>  Tue, 6 Dec 2022 12:15:00 -0400
 
 daos (2.3.101-4) unstable; urgency=medium
   [ Tom Nabarro ]
   * Update SPDK dependency requirement to greater than or equal to 22.01.2.
 
- -- Tom Nabarro <Tom Nabarro <tom.nabarro@intel.com>  Thu, 01 Dec 2022 12:43:00 -0400
+ -- Tom Nabarro <Tom Nabarro <tom.nabarro@intel.com>  Thu, 1 Dec 2022 12:43:00 -0400
 
 daos (2.3.101-3) unstable; urgency=medium
   [ Brian J. Murrell ]
@@ -20,7 +20,7 @@ daos (2.3.101-2) unstable; urgency=medium
   [Michael MacDonald]
   * Rename daos_admin -> daos_server_helper
 
- -- Michael MacDonald <mjmac.macdonald@intel.com> Thu, Oct 6 2022 10:10:00
+ -- Michael MacDonald <mjmac.macdonald@intel.com> Thu, 06 Oct 2022 10:10:00
 
 daos (2.3.101-1) unstable; urgency=medium
   [ Johann Lombardi ]
@@ -56,7 +56,7 @@ daos (2.3.100-18) unstable; urgency=medium
   [Michael MacDonald]
   * Bump min supported go version to 1.16
 
- -- Michael MacDonald <mjmac.macdonald@intel.com> Tue, Jul 26 2022 10:10:00 -0400
+ -- Michael MacDonald <mjmac.macdonald@intel.com> Tue, 26 Jul 2022 10:10:00 -0400
 
 daos (2.3.100-17) unstable; urgency=medium
   [ Jerome Soumagne ]

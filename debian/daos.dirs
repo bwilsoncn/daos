@@ -1,4 +1,4 @@
 usr/bin
-lib/x86_64-linux-gnu/daos
+lib/daos
 etc/daos
 etc/daos/certs

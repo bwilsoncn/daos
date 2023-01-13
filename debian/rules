@@ -65,12 +65,13 @@ override_dh_auto_install:
 	touch ${buildroot}$(prefix)/lib64/libdaos_serialize.so
 	# DO NOT LAND
 	# hack: why are these being installed?
-	rm -f ${buildroot}$(prefix)/lib/daos/TESTING/ftest/cart/*.{cpp,o,su,c,h}
+	cd ${buildroot}$(prefix)/lib/daos/TESTING/ftest/cart/ && rm -f *.cpp *.o *.su *.c *.h
 	# DO NOT LAND
 	# hack: how do we get these all installed in the right place?
-	mkdir -p ${buildroot}$(prefix)/lib/python3.8/
+	mkdir -p ${buildroot}$(prefix)/lib/python3.8/ ${buildroot}$(prefix)/lib/daos/ ${buildroot}/lib/x86_64-linux-gnu/
 	mv ${buildroot}$(prefix)/lib64/python3.8/site-packages/* ${buildroot}$(prefix)/lib/python3.8/
-	mv ${buildroot}$(prefix)/lib64/lib*.so* ${buildroot}$(prefix)/lib64/daos_srv ${buildroot}/lib/x86_64-linux-gnu/
+	cd ${buildroot}$(prefix)/lib64/ && mv lib*.a lib*.so* daos_srv ../../lib/x86_64-linux-gnu/
+	cd ${buildroot}$(prefix)/lib64/daos/ && mv certgen VERSION API_VERSION ../../lib/daos/
 
 override_dh_missing:
 	# we want builds to break if files are unpackaged
