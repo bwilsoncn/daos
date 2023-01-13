@@ -5,12 +5,9 @@ usr/lib64/libdaos.so.*
 usr/lib64/libds3.so
 usr/lib64/libduns.so
 usr/lib64/libcart.so.*
-usr/lib64/daos_srv/libvos_srv.so
-usr/lib64/libdaos_tests.so
 usr/lib64/libdaos_cmd_hdlrs.so
 usr/lib64/libdfuse.a
 usr/lib64/libdfuse.so
 usr/lib64/libdpar.so
-usr/lib64/libdpar_mpi.so
 usr/lib64/libioil.a
 usr/lib64/libioil.so

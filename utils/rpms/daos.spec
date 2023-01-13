@@ -359,6 +359,7 @@ getent passwd daos_server >/dev/null || useradd -s /sbin/nologin -r -g daos_serv
 getent group daos_agent >/dev/null || groupadd -r daos_agent
 getent group daos_daemons >/dev/null || groupadd -r daos_daemons
 getent passwd daos_agent >/dev/null || useradd -s /sbin/nologin -r -g daos_agent -G daos_daemons daos_agent
+
 %post client
 %systemd_post %{agent_svc_name}
 %preun client
