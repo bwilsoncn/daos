@@ -47,9 +47,14 @@ post_provision_config_nodes() {
         fi
     fi
 
-    apt-get -y install avocado python3-avocado-plugins-output-html   \
-                       python3-avocado-plugins-varianter-yaml-to-mux \
-                       lsb-core
+    #apt-get -y install avocado python3-avocado-plugins-output-html   \
+    #                   python3-avocado-plugins-varianter-yaml-to-mux \
+    #                   lsb-core patchutils
+
+    python3 -m  install --upgrade pip
+    python3 -m ppipip install "avocado-framework<70.0"
+    python3 -m pip install "avocado-framework-plugin-result-html<70.0"
+    python3 -m pip install "avocado-framework-plugin-varianter-yaml-to-mux<70.0"
 
     if [ -n "$INST_RPMS" ] &&
        ! apt-get -y install "${inst_rpms[@]}"; then

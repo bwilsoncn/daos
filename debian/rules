@@ -63,6 +63,10 @@ override_dh_auto_install:
 	# DO NOT LAND
 	# hack until we have daos-serialize.so properly building
 	touch ${buildroot}$(prefix)/lib64/libdaos_serialize.so
+	# DO NOT LAND
+	# hack: why are these being installed?
+	rm -f ${buildroot}$(prefix)/lib/daos/TESTING/ftest/cart/*.{cpp,o,su,c,h}
+
 
 override_dh_missing:
 	# we want builds to break if files are unpackaged

@@ -7,6 +7,11 @@
 
 set -eux
 
+# for pip installed avocado
+if ! command -v avocado; then
+    export PATH=~/.local/bin:$PATH
+fi
+
 # check that vm.max_map_count has been configured/bumped
 if [ "$(sudo sysctl -n vm.max_map_count)" -lt "1000000" ] ; then
     echo "vm.max_map_count is not set as expected"
@@ -200,7 +205,7 @@ if [ "${STAGE_NAME}" == "Functional Hardware 24" ]; then
     launch_node_args="-ts ${server_nodes} -tc ${client_nodes}"
 fi
 # shellcheck disable=SC2086,SC2090
-if ! ./launch.py --mode ci ${launch_node_args} ${LAUNCH_OPT_ARGS} ${TEST_TAG_ARR[*]}; then
+if ! ./launch.py --mode ci ${launch_node_args} ${LAUNCH_OPT_ARGS} "${TEST_TAG_ARR[@]}"; then
     rc=${PIPESTATUS[0]}
 else
     rc=0
