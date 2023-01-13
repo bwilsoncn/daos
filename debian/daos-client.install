@@ -3,10 +3,10 @@ usr/bin/self_test
 usr/bin/daos_agent
 usr/bin/dfuse
 usr/bin/daos
-usr/lib64/daos/API_VERSION
-usr/lib64/python3.8/site-packages/pydaos/*.py
-usr/lib64/python3.8/site-packages/pydaos/pydaos_shim.so
-usr/lib64/python3.8/site-packages/pydaos/raw/*.py
+lib/x86_64-linux-gnu/daos/API_VERSION
+lib/python3.8/pydaos/*.py
+lib/python3.8/pydaos/pydaos_shim.so
+lib/python3.8/pydaos/raw/*.py
 usr/share/daos/ioil-ld-opts
 etc/daos/daos_agent.yml
 usr/lib/systemd/system/daos_agent.service

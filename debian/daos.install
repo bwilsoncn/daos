@@ -1,5 +1,5 @@
 etc/daos/memcheck-cart.supp
 # Certificate generation files
-usr/lib64/daos/certgen/*
-usr/lib64/daos/VERSION
+lib/x86_64-linux-gnu/daos/certgen/*
+lib/x86_64-linux-gnu/daos/VERSION
 etc/bash_completion.d/daos.bash
