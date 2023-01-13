@@ -49,7 +49,11 @@ post_provision_config_nodes() {
 
     #apt-get -y install avocado python3-avocado-plugins-output-html   \
     #                   python3-avocado-plugins-varianter-yaml-to-mux \
-    #                   lsb-core patchutils
+
+    apt-get -y install  lsb-core patchutils
+    apt-get -y remove python3-avocado{,-plugins-{varianter-yaml-to-mux,output-html}}
+
+
 
     python3 -m pip install --upgrade pip
     python3 -m pip install "avocado-framework<70.0"
