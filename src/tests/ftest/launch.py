@@ -40,6 +40,7 @@ from run_utils import run_local, run_remote, RunException                     # 
 from slurm_utils import show_partition, create_partition, delete_partition    # noqa: E402
 from user_utils import get_chown_command, groupadd, useradd, userdel, get_group_id, \
     get_user_groups  # noqa: E402
+from utils import detect  # noqa: E402
 
 BULLSEYE_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.cov")
 BULLSEYE_FILE = os.path.join(os.sep, "tmp", "test.cov")
@@ -2481,7 +2482,9 @@ class Launch():
         daos_test_log_dir = os.environ["DAOS_TEST_LOG_DIR"]
         certs_dir = os.path.join(daos_test_log_dir, "daosCA")
         certgen_dir = os.path.abspath(
-            os.path.join("..", "..", "..", "..", "lib64", "daos", "certgen"))
+            os.path.join("..", "..", "..", "..",
+                         "..", "lib" if detect().name.lower() == 'ubuntu' else "lib64",
+                         "daos", "certgen"))
         command = os.path.join(certgen_dir, "gen_certificates.sh")
         try:
             run_local(logger, ["/usr/bin/rm", "-rf", certs_dir])
