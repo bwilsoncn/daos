@@ -3,7 +3,7 @@ usr/bin/self_test
 usr/bin/daos_agent
 usr/bin/dfuse
 usr/bin/daos
-usr/lib/daos/API_VERSION
+lib/x86_64-linux-gnu/daos/API_VERSION
 usr/lib/python3.8/pydaos/*.py
 usr/lib/python3.8/pydaos/pydaos_shim.so
 usr/lib/python3.8/pydaos/raw/*.py
