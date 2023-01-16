@@ -16,6 +16,10 @@ post_provision_config_nodes() {
     #                 slurm-example-configs slurmctld slurm-slurmmd
     #fi
 
+    if ls -l /usr/lib64/; then
+        dpkg -S /usr/lib64/*
+    fi
+
     if [ -n "$INST_REPOS" ]; then
         for repo in $INST_REPOS; do
             branch="master"
