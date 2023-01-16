@@ -40,7 +40,7 @@ from run_utils import run_local, run_remote, RunException                     # 
 from slurm_utils import show_partition, create_partition, delete_partition    # noqa: E402
 from user_utils import get_chown_command, groupadd, useradd, userdel, get_group_id, \
     get_user_groups  # noqa: E402
-from utils import detect  # noqa: E402
+from util.distro_utils import detect  # noqa: E402
 
 BULLSEYE_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.cov")
 BULLSEYE_FILE = os.path.join(os.sep, "tmp", "test.cov")
