@@ -68,9 +68,11 @@ override_dh_auto_install:
 	cd ${buildroot}$(prefix)/lib/daos/TESTING/ftest/cart/ && rm -f *.cpp *.o *.su *.c *.h
 	# DO NOT LAND
 	# hack: how do we get these all installed in the right place?
-	mkdir -p ${buildroot}$(prefix)/lib/python3.8/ ${buildroot}$(prefix)/lib/daos/ ${buildroot}/lib/x86_64-linux-gnu/
+	mkdir -p ${buildroot}$(prefix)/lib/python3.8/ ${buildroot}$(prefix)/lib/daos/ ${buildroot}/lib/x86_64-linux-gnu/ ${buildroot}/lib/x86_64-linux-gnu/daos/
 	mv ${buildroot}$(prefix)/lib64/python3.8/site-packages/* ${buildroot}$(prefix)/lib/python3.8/
 	cd ${buildroot}$(prefix)/lib64/ && mv lib*.a lib*.so* daos_srv ../../lib/x86_64-linux-gnu/
+	# this is a really horrible path for thisL
+	cd ${buildroot}$(prefix)/lib64/daos/ && mv API_VERSION ../../../lib/x86_64-linux-gnu/daos/
 	cd ${buildroot}$(prefix)/lib64/daos/ && mv certgen VERSION API_VERSION ../../lib/daos/
 
 override_dh_missing:
