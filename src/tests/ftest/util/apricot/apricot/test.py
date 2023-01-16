@@ -507,7 +507,9 @@ class TestWithoutServers(Test):
         self.fault_injection = FaultInjection()
         self.fault_injection.start(self.params.get("fault_list", '/run/faults/*'), self.test_dir)
 
-        self.context = DaosContext(self.prefix + '/lib64/')
+        self.context = DaosContext(
+            os.path.join(self.prefix,
+                         "lib" if detect().name.lower() == 'ubuntu' else 'lib64'))
         self.d_log = DaosLog(self.context)
         self.test_log.daos_log = self.d_log
 
