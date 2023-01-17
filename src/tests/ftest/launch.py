@@ -18,6 +18,7 @@ import site
 import sys
 import time
 import yaml
+import distro
 
 # When SRE-439 is fixed we should be able to include these import statements here
 # from avocado.core.settings import settings
@@ -26,6 +27,10 @@ import yaml
 from ClusterShell.NodeSet import NodeSet
 
 # When SRE-439 is fixed we should be able to include these import statements here
+# Actually, you cannot.  If you add this here, this will cause Avocado to open
+# and read the per-user config which we hope to actually [over-]write later in
+# Launch().set_config(), but that write will be a NOOP because the config will
+# already have been read and cached.
 # from util.distro_utils import detect
 # pylint: disable=import-error,no-name-in-module
 from process_core_files import CoreFileProcessing
@@ -40,7 +45,6 @@ from run_utils import run_local, run_remote, RunException                     # 
 from slurm_utils import show_partition, create_partition, delete_partition    # noqa: E402
 from user_utils import get_chown_command, groupadd, useradd, userdel, get_group_id, \
     get_user_groups  # noqa: E402
-from util.distro_utils import detect  # noqa: E402
 
 BULLSEYE_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test.cov")
 BULLSEYE_FILE = os.path.join(os.sep, "tmp", "test.cov")
@@ -430,6 +434,9 @@ class AvocadoInfo():
         """
         default_base_dir = os.path.join("~", "avocado", "job-results")
         logger.info("default_base_dir = %s", default_base_dir)
+        datadir_paths_logs_dir = self.get_setting("datadir.paths", "logs_dir", default_base_dir)
+        logger.info("datadir.paths = %s ", datadir_paths_logs_dir)
+        time.sleep(2)
         datadir_paths_logs_dir = self.get_setting("datadir.paths", "logs_dir", default_base_dir)
         logger.info("datadir.paths = %s ", datadir_paths_logs_dir)
         if datadir_paths_logs_dir != '/var/tmp/ftest/avocado/job-results':
@@ -2487,8 +2494,9 @@ class Launch():
         daos_test_log_dir = os.environ["DAOS_TEST_LOG_DIR"]
         certs_dir = os.path.join(daos_test_log_dir, "daosCA")
         certgen_dir = os.path.abspath(
-            os.path.join("..", "..", "..", "..",
-                         "..", "lib" if detect().name.lower() == 'ubuntu' else "lib64",
+            # TODO: this really should not be in /usr/lib64 even on EL/SUSE
+            os.path.join("..", "..", "..", "..", "..",
+                         "lib" if distro.linux_distribution()[0].lower() == 'ubuntu' else "lib64",
                          "daos", "certgen"))
         command = os.path.join(certgen_dir, "gen_certificates.sh")
         try:
