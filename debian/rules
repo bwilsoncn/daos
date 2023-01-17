@@ -90,3 +90,4 @@ override_dh_fixperms:
 	# set daos_server to be setgid daos_server in order to invoke daos_server_helper
 	chmod 2755 debian/tmp$(prefix)/bin/daos_server
 	ls -l debian/tmp${prefix}/bin/
+	ls -l debian/daos-server${prefix}/bin/
