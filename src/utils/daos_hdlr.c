@@ -2274,6 +2274,11 @@ out_disconnect:
 	if (rc2 != 0)
 		DH_PERROR_DER(ap, rc2, "failed to disconnect");
 out:
+	if (rc != 0) {
+		D_FREE(ap->dm_args);
+		D_FREE(ap->fs_copy_stats);
+	}
+
 	D_FREE(src_str);
 	D_FREE(dst_str);
 	return rc;
@@ -2808,6 +2813,9 @@ out_disconnect:
 		DH_PERROR_DER(ap, rc2, "Failed to disconnect");
 	}
 out:
+	if (rc != 0)
+		D_FREE(ap->dm_args);
+
 	D_FREE(src_str);
 	D_FREE(dst_str);
 	D_FREE(ca->src);
