@@ -4,6 +4,9 @@
 
 set -ex
 
+hostname
+pwd
+
 if $TEST_RPMS; then
     # now collect up the logs and store them like non-RPM test does
     mkdir -p install/lib/daos/TESTING/

@@ -429,6 +429,11 @@ class AvocadoInfo():
 
         """
         default_base_dir = os.path.join("~", "avocado", "job-results")
+        logger.info("default_base_dir = %s", default_base_dir)
+        datadir_paths_logs_dir = self.get_setting("datadir.paths", "logs_dir", default_base_dir)
+        logger.info("datadir.paths = %s ", datadir_paths_logs_dir)
+        if datadir_paths_logs_dir != '/var/tmp/ftest/avocado/job-results':
+            sys.exit(-1)
         return os.path.expanduser(self.get_setting("datadir.paths", "logs_dir", default_base_dir))
 
     def get_directory(self, directory, create=True):
@@ -3158,6 +3163,7 @@ class Launch():
 
         """
         avocado_logs_dir = self.avocado.get_logs_dir()
+        logger.info("avocado_logs_dir = " + avocado_logs_dir)
         test_logs_lnk = os.path.join(avocado_logs_dir, "latest")
         test_logs_dir = os.path.realpath(test_logs_lnk)
 
@@ -3524,4 +3530,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print('main')
+#    main()
