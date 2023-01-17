@@ -3512,6 +3512,7 @@ def main():
             args.logs_threshold = DEFAULT_LOGS_THRESHOLD
         args.slurm_setup = True
         args.user_create = True
+        args.overwrite_config = True
 
     # Perform the steps defined by the arguments specified
     try:
