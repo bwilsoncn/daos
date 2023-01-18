@@ -1,5 +1,5 @@
 //
-// (C) Copyright 2019-2022 Intel Corporation.
+// (C) Copyright 2019-2023 Intel Corporation.
 //
 // SPDX-License-Identifier: BSD-2-Clause-Patent
 //
@@ -52,22 +52,21 @@ type PoolCreateCmd struct {
 	cfgCmd
 	ctlInvokerCmd
 	jsonOutputCmd
-	GroupName     string           `short:"g" long:"group" description:"DAOS pool to be owned by given group, format name@domain"`
-	UserName      string           `short:"u" long:"user" description:"DAOS pool to be owned by given user, format name@domain"`
-	PoolLabelFlag string           `short:"p" long:"label" description:"Unique label for pool (deprecated, use positional argument)"`
-	Properties    PoolSetPropsFlag `short:"P" long:"properties" description:"Pool properties to be set"`
-	ACLFile       string           `short:"a" long:"acl-file" description:"Access Control List file path for DAOS pool"`
-	Size          string           `short:"z" long:"size" description:"Total size of DAOS pool or its percentage ratio (auto)"`
-	TierRatio     string           `short:"t" long:"tier-ratio" default:"6,94" description:"Percentage of storage tiers for pool storage (auto)"`
-	NumRanks      uint32           `short:"k" long:"nranks" description:"Number of ranks to use (auto)"`
-	NumSvcReps    uint32           `short:"v" long:"nsvc" description:"Number of pool service replicas"`
-	ScmSize       string           `short:"s" long:"scm-size" description:"Per-engine SCM allocation for DAOS pool (manual)"`
-	NVMeSize      string           `short:"n" long:"nvme-size" description:"Per-engine NVMe allocation for DAOS pool (manual)"`
-	RankList      ui.RankSetFlag   `short:"r" long:"ranks" description:"Storage engine unique identifiers (ranks) for DAOS pool"`
+	GroupName  string           `short:"g" long:"group" description:"DAOS pool to be owned by given group, format name@domain"`
+	UserName   string           `short:"u" long:"user" description:"DAOS pool to be owned by given user, format name@domain"`
+	Properties PoolSetPropsFlag `short:"P" long:"properties" description:"Pool properties to be set"`
+	ACLFile    string           `short:"a" long:"acl-file" description:"Access Control List file path for DAOS pool"`
+	Size       string           `short:"z" long:"size" description:"Total size of DAOS pool or its percentage ratio (auto)"`
+	TierRatio  string           `short:"t" long:"tier-ratio" default:"6,94" description:"Percentage of storage tiers for pool storage (auto)"`
+	NumRanks   uint32           `short:"k" long:"nranks" description:"Number of ranks to use (auto)"`
+	NumSvcReps uint32           `short:"v" long:"nsvc" description:"Number of pool service replicas"`
+	ScmSize    string           `short:"s" long:"scm-size" description:"Per-engine SCM allocation for DAOS pool (manual)"`
+	NVMeSize   string           `short:"n" long:"nvme-size" description:"Per-engine NVMe allocation for DAOS pool (manual)"`
+	RankList   ui.RankSetFlag   `short:"r" long:"ranks" description:"Storage engine unique identifiers (ranks) for DAOS pool"`
 
 	Args struct {
 		PoolLabel string `positional-arg-name:"<pool label>"`
-	} `positional-args:"yes"`
+	} `positional-args:"yes" required:"1"`
 }
 
 // Regexp allowing to define the size of a new pool as the percentage of the overall available storage
@@ -80,10 +79,6 @@ func (cmd *PoolCreateCmd) Execute(args []string) error {
 	}
 	if cmd.Size == "" && cmd.ScmSize == "" {
 		return errors.New("either --size or --scm-size must be supplied")
-	}
-
-	if cmd.PoolLabelFlag != "" {
-		cmd.Args.PoolLabel = cmd.PoolLabelFlag
 	}
 
 	if cmd.Args.PoolLabel != "" {
