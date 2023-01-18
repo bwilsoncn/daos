@@ -20,7 +20,6 @@ import (
 	"github.com/daos-stack/daos/src/control/cmd/dmg/pretty"
 	"github.com/daos-stack/daos/src/control/common"
 	"github.com/daos-stack/daos/src/control/lib/control"
-	"github.com/daos-stack/daos/src/control/lib/daos"
 	"github.com/daos-stack/daos/src/control/lib/ranklist"
 	"github.com/daos-stack/daos/src/control/lib/ui"
 	"github.com/daos-stack/daos/src/control/server/storage"
@@ -327,8 +326,8 @@ type poolCmd struct {
 	jsonOutputCmd
 
 	Args struct {
-		Pool PoolID `positional-arg-name:"<pool name or UUID>"`
-	} `positional-args:"yes"`
+		Pool PoolID `positional-arg-name:"<pool label or UUID>"`
+	} `positional-args:"yes" required:"1"`
 }
 
 func (cmd *poolCmd) PoolID() *PoolID {
@@ -595,36 +594,14 @@ func (cmd *PoolUpgradeCmd) Execute(args []string) error {
 // PoolSetPropCmd represents the command to set a property on a pool.
 type PoolSetPropCmd struct {
 	poolCmd
-	Property string `short:"n" long:"name" description:"Name of property to be set (deprecated; use positional argument)"`
-	Value    string `short:"v" long:"value" description:"Value of property to be set (deprecated; use positional argument)"`
 
 	Args struct {
-		Props PoolSetPropsFlag `positional-arg-name:"pool properties to set (key:val[,key:val...])"`
-	} `positional-args:"yes"`
+		Props PoolSetPropsFlag `positional-arg-name:"<key:val[,key:val...]>"`
+	} `positional-args:"yes" required:"1"`
 }
 
 // Execute is run when PoolSetPropCmd subcommand is activatecmd.
 func (cmd *PoolSetPropCmd) Execute(_ []string) error {
-	// TODO (DAOS-7964): Remove support for --name/--value flags.
-	if cmd.Property != "" || cmd.Value != "" {
-		if len(cmd.Args.Props.ToSet) > 0 {
-			return errors.New("cannot mix flags and positional arguments")
-		}
-		if cmd.Property == "" || cmd.Value == "" {
-			return errors.New("both --name and --value must be supplied if either are supplied")
-		}
-
-		propName := strings.ToLower(cmd.Property)
-		p, err := daos.PoolProperties().GetProperty(propName)
-		if err != nil {
-			return err
-		}
-		if err := p.SetValue(cmd.Value); err != nil {
-			return err
-		}
-		cmd.Args.Props.ToSet = []*daos.PoolProperty{p}
-	}
-
 	for _, prop := range cmd.Args.Props.ToSet {
 		if prop.Name == "rd_fac" {
 			return errors.New("can't set redundancy factor on existing pool.")
@@ -659,7 +636,7 @@ func (cmd *PoolSetPropCmd) Execute(_ []string) error {
 type PoolGetPropCmd struct {
 	poolCmd
 	Args struct {
-		Props PoolGetPropsFlag `positional-arg-name:"pool properties to get (key[,key...])"`
+		Props PoolGetPropsFlag `positional-arg-name:"[key[,key...]]"`
 	} `positional-args:"yes"`
 }
 

@@ -569,23 +569,6 @@ func TestPoolCommands(t *testing.T) {
 			nil,
 		},
 		{
-			"Set pool property with pool flag and deprecated flags",
-			"pool set-prop 031bcaf8-f0f5-42ef-b3c5-ee048676dceb --name label --value foo",
-			strings.Join([]string{
-				printRequest(t, &control.PoolSetPropReq{
-					ID:         "031bcaf8-f0f5-42ef-b3c5-ee048676dceb",
-					Properties: []*daos.PoolProperty{propWithVal("label", "foo")},
-				}),
-			}, " "),
-			nil,
-		},
-		{
-			"Set pool property mixed flags/positional",
-			"pool set-prop 031bcaf8-f0f5-42ef-b3c5-ee048676dceb --name label --value foo label:foo",
-			"",
-			errors.New("cannot mix"),
-		},
-		{
 			"Set pool property invalid property",
 			"pool set-prop 031bcaf8-f0f5-42ef-b3c5-ee048676dceb whoops:foo",
 			"",

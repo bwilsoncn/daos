@@ -88,7 +88,7 @@ func TestDmg_JsonOutput(t *testing.T) {
 				testArgs = append(testArgs, test.MockUUID())
 			case "pool create":
 				testArgs = append(testArgs, "-s", "1TB")
-			case "pool destroy", "pool evict", "pool query", "pool get-acl":
+			case "pool destroy", "pool evict", "pool query", "pool get-acl", "pool upgrade":
 				testArgs = append(testArgs, test.MockUUID())
 			case "pool overwrite-acl", "pool update-acl":
 				testArgs = append(testArgs, test.MockUUID(), "-a", aclPath)
